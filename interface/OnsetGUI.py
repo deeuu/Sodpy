@@ -12,7 +12,6 @@ class OnsetsGUI:
              
         self.parent = parent        
         self.initUI()
-        pygame.init()
 
     def initUI(self):
 
