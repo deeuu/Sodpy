@@ -1,4 +1,4 @@
-Simple Onset Detection Tools for Python (Sodpy)
+Simple Onset Detection in Python (Sodpy)
 ==============================================
 
 Sodpy is a simple onset detection library written in pure python. Hopefully this
@@ -23,7 +23,7 @@ The basic GUI lives in the directory <code>interface/</code>; just type:
 
 Acknowledgments
 --------------
-GUI and STFT: https://github.com/MTG/sms-tools
+GUI and STFT support: https://github.com/MTG/sms-tools
 
 Implementation support: https://github.com/johnglover/modal
 
