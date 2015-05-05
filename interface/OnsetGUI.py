@@ -352,9 +352,9 @@ class OnsetsGUI:
         params = self.getAllParams()[1:]
         return params
 
-    def setParams(self, startTime, endTime, window, m, n, h, detector,
+    def setParams(self, startTime, endTime, window, M, N, H, detector,
             levelThreshold, fLo, fHi, tau, filterSize, offset, factor,
-            interval):
+            interval, allowPlot):
 
         self.startTime.delete(0, END)
         self.startTime.insert(0, startTime)
@@ -386,6 +386,7 @@ class OnsetsGUI:
         self.tau.insert(0,tau)
         self.minIOI.delete(0,END)
         self.minIOI.insert(0,interval)
+        self.plotState.set(allowPlot == 'True')
 
 def main():
     root = Tk()
