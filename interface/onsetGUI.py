@@ -2,7 +2,8 @@ from Tkinter import *
 import tkFileDialog, tkMessageBox
 import sys, os
 from audiolab import wavread, play
-from sodpy.onsetExtraction import Extractor, BatchExtractor
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../src/'))
+from onsetExtraction import Extractor, BatchExtractor
 import pickle
 
 class OnsetsGUI:
