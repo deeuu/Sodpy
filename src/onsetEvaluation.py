@@ -35,7 +35,11 @@ class Evaluator:
         recall = numTruePositives / float(numTruePositives + numFalseNegatives)
         fMeasure = 2 * precision * recall / (precision + recall)
 
-        outputDic = {   'precision' : precision,
+        outputDic = {   
+                        'numTruePositives' : numTruePositives,
+                        'numFalseNegatives' : numFalseNegatives,
+                        'numFalsePositives' : numFalsePositives,
+                        'precision' : precision,
                         'recall' : recall,
                         'fMeasure' : fMeasure,
                         'correctOnsetDistances' : correctOnsetDistances,

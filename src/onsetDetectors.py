@@ -40,15 +40,17 @@ class OnsetDetector(object):
         self.levelThreshold = -80
 
     def process(self, mX, pX):
+
         self.mX = mX.copy()
         self.pX = pX.copy()
         self.halfN = mX.size
+
         #if using filter...
         if self.filterInitialised:
             self.filterSpectrum()
         #clip magnitude spectrum...
         self.clipSpectrum()
-        #
+
         return self.processInternal()
 
     def processInternal(self):

@@ -3,4 +3,5 @@
 *.csv
 *.pickle
 interface/outputSounds/*
+build/*
 !.gitignore

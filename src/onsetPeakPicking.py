@@ -22,8 +22,8 @@ class PeakPicker():
         #get the raw ODF
         self.odf = odf.copy()
 
-        #first normalise the detection function to range [0, 1]
-        normalise(self.odf)
+        #first normalise the detection function
+        self.odf = normalise(self.odf, True)
 
         #smooth the ODF using a zero-phase low-pass filter
         self.smoothODF = onePole(self.odf, self.fs/float(self.H), self.tau, True)

@@ -61,7 +61,7 @@ class STFT(object):
         '''
         hN = (self.N/2)+1 #includes DC
         mX, pX = np.zeros((2, hN))
-        notNyqIdx = hN
+        notNyqIdx = hN # excludes Nyquist when indexing array
         if (hN % 2) > 0:
             notNyqIdx = hN - 1
         if(self.frame < self.numFrames):

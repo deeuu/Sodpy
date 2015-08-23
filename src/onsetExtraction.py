@@ -146,7 +146,7 @@ class Extractor:
             ax3.plot(frameTime, self.picker.smoothODF, 'g')
             ax3.plot(frameTime, self.picker.adaptThresh, 'r--')
             ax3.plot(self.onsetTimes, self.picker.onsetValues, 'o', color='cyan')
-            ax3.axis([0, totalLength, 0, 1])
+            ax3.axis([0, totalLength, np.min(self.picker.odf), np.max(self.picker.odf)])
             ax3.set_ylabel("Normalised units")
             plt.xlabel('Time, s')
 
@@ -171,6 +171,7 @@ class BatchExtractor:
     def __init__(self):
 
         self.extractor = Extractor()
+        self.saveOutput = True
 
     def initialise(self, directory, params = None):
 
@@ -185,4 +186,5 @@ class BatchExtractor:
             print "Processing file: ", inputFile
             self.extractor.initialise(inputFile)
             extractor.process()
-            extractor.saveOnsetsToCSV()
+            if self.saveOutput:
+                extractor.saveOnsetsToCSV()

@@ -9,9 +9,14 @@ def noiseBurst(fs):
     noise /= np.max(noise)
     return noise
 
-def normalise(env):
-    env -= env.min()
-    env /= env.max()
+def normalise(env, zeroMeanOneSTD = False):
+
+    if zeroMeanOneSTD:
+        env = (env - np.mean(env)) / np.std(env)
+    else:
+        env -= env.min()
+        env /= env.max()
+    return env
 
 def lpf(signal, order=2, cutOff=10, fs=44100, bidirectional=False):
     b,a = butter(order, cutOff / (0.5*fs), 'lowpass')
