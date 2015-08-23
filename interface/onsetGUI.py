@@ -2,9 +2,8 @@ from Tkinter import *
 import tkFileDialog, tkMessageBox
 import sys, os
 from audiolab import wavread, play
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../src/'))
-import OnsetExtractorFunc, BatchOnsetExtractorFunc
-import csv
+from sodpy.onsetExtraction import Extractor, BatchExtractor
+import pickle
 
 class OnsetsGUI:
   
@@ -12,6 +11,7 @@ class OnsetsGUI:
              
         self.parent = parent        
         self.initUI()
+        self.extractor = Extractor()
 
     def initUI(self):
 
@@ -86,33 +86,33 @@ class OnsetsGUI:
         rowIdx += 1
 
         #WINDOW SIZE
-        mSizeLabel = "Window size:"
-        Label(self.parent, text=mSizeLabel).grid(row=rowIdx, column=0, sticky=W, padx=5)
-        self.mSize = Entry(self.parent, justify=CENTER)
-        self.mSize["width"] = 5
-        self.mSize.grid(row=rowIdx)
-        self.mSize.delete(0, END)
-        self.mSize.insert(0, "1023")
+        windowSizeLabel = "Window size:"
+        Label(self.parent, text=windowSizeLabel).grid(row=rowIdx, column=0, sticky=W, padx=5)
+        self.windowSize = Entry(self.parent, justify=CENTER)
+        self.windowSize["width"] = 5
+        self.windowSize.grid(row=rowIdx)
+        self.windowSize.delete(0, END)
+        self.windowSize.insert(0, "1023")
         rowIdx += 1
 
         #FFT SIZE
-        nSizeLabel = "FFT size (power of 2):"
-        Label(self.parent, text=nSizeLabel).grid(row=rowIdx, column=0, sticky=W, padx=5)
-        self.nSize = Entry(self.parent, justify=CENTER)
-        self.nSize["width"] = 5
-        self.nSize.grid(row=rowIdx)
-        self.nSize.delete(0, END)
-        self.nSize.insert(0, "1024")
+        fftSizeLabel = "FFT size (power of 2):"
+        Label(self.parent, text=fftSizeLabel).grid(row=rowIdx, column=0, sticky=W, padx=5)
+        self.fftSize = Entry(self.parent, justify=CENTER)
+        self.fftSize["width"] = 5
+        self.fftSize.grid(row=rowIdx)
+        self.fftSize.delete(0, END)
+        self.fftSize.insert(0, "1024")
         rowIdx += 1
 
         #HOP SIZE
-        hSizeLabel = "Hop size:"
-        Label(self.parent, text=hSizeLabel).grid(row=rowIdx, column=0, sticky=W, padx=5)
-        self.hSize = Entry(self.parent, justify=CENTER)
-        self.hSize["width"] = 5
-        self.hSize.grid(row=rowIdx)
-        self.hSize.delete(0, END)
-        self.hSize.insert(0, "512")
+        hopSizeLabel = "Hop size:"
+        Label(self.parent, text=hopSizeLabel).grid(row=rowIdx, column=0, sticky=W, padx=5)
+        self.hopSize = Entry(self.parent, justify=CENTER)
+        self.hopSize["width"] = 5
+        self.hopSize.grid(row=rowIdx)
+        self.hopSize.delete(0, END)
+        self.hopSize.insert(0, "512")
         rowIdx += 1
 
         #LEVEL THRESHOLD
@@ -188,7 +188,7 @@ class OnsetsGUI:
         rowIdx += 1
 
         #MIN INTER-ONSET INTERVAL
-        minIOILabel = "Min inter-onset Interval (s):"
+        minIOILabel = "Min inter-onset interval (s):"
         Label(self.parent, text=minIOILabel).grid(row=rowIdx, sticky=W, padx=5)
         self.minIOI = Entry(self.parent, justify=CENTER)
         self.minIOI["width"] = 5
@@ -211,7 +211,7 @@ class OnsetsGUI:
         self.compute.grid(row=rowIdx, column=0, padx=5, pady=10, sticky=W)
 
         #BUTTON TO PREVIEW OUTPUT SOUND FILE
-        self.preview = Button(self.parent, text=">", command=self.preview_output, bg="gray30", fg="white")
+        self.preview = Button(self.parent, text=">", command=self.previewOutput, bg="gray30", fg="white")
         self.preview.grid(row=rowIdx, column=0, sticky=W, padx=80)
 
         #PLOT OPTION
@@ -261,10 +261,10 @@ class OnsetsGUI:
 
         # define options for opening file
         self.fileParamsOpt = options = {}
-        options['defaultextension'] = '.csv'
-        options['filetypes'] = [('csv files', '.csv')]
+        options['defaultextension'] = '.pickle'
+        options['filetypes'] = [('pickle files', '.pickle')]
         options['initialdir'] = '../sounds/'
-        options['title'] = 'Open a parameter file (.csv)'
+        options['title'] = 'Open a parameter file (.pickle)'
 
     def browse_file(self):
         self.filename = tkFileDialog.askopenfilename(**self.fileOpt)
@@ -285,108 +285,107 @@ class OnsetsGUI:
             endIdx = int(float(self.endTime.get())*fs)
         play(signal[startIdx:endIdx], fs)
 
-    def preview_output(self):
-        outputFile = 'outputSounds/' +\
-                os.path.basename(self.fileLocation.get())[:-4] + "_onsets.wav"
-        signal, fs, enc = wavread(outputFile)
-        play(signal, fs)
+    def previewOutput(self):
+        out = self.extractor.generateMarkedAudio()
+        print out
+        if out:
+            play(out[0], out[1])
+        else:
+            print 'Please try processing the input audio again.'
 
     def loadParams(self):
-        filename = tkFileDialog.askopenfilename(**self.fileParamsOpt)
-        inFile = open(filename, 'r')
-        params = tuple([i for i in csv.reader(inFile) ][0])
-        inFile.close()
-        self.setParams(*params)
+        fileName = tkFileDialog.askopenfilename(**self.fileParamsOpt)
+        if fileName:
+            params = pickle.load(open(fileName, 'rb'));
+            self.setParams(params)
 
     def saveParams(self):
-        filename = self.fileLocation.get()[:-4] + "_params.csv"
-        print "Saved to: " + filename
-        outFile = open(filename, 'w')
-        writer = csv.writer(outFile)
-        writer.writerow(self.getParams())
-        outFile.close()
+        fileName = self.fileLocation.get()[:-4] + "_params.pickle"
+        pickle.dump(self.getParams(), file(fileName, 'wb'))
+        print "Saved to: " + fileName
 
     def process(self):
-        print "Processing..."
-        if(OnsetExtractorFunc.main(*self.getAllParams(False))):
-            print "Complete"
-        else:
-            print "Error"
 
-    def batchProcess(self):
-        print "Processing audio files..."
-        BatchOnsetExtractorFunc.main(*self.getAllParams(True))
+        self.extractor.params = self.getParams();
+        self.extractor.initialise(self.fileLocation.get())
+        self.extractor.allowPlot = self.plotState.get()
+
+        print "Processing..."
+        self.extractor.process()
         print "Complete"
 
-    def getAllParams(self, batch=False):
+        if self.plotState.get():
+            self.extractor.plot()
+        self.extractor.saveOnsetsToCSV()
 
-        if(batch):
-            inputFile = self.directory.get()
-        else:
-            inputFile = self.fileLocation.get()
+    def batchProcess(self):
+
+        batchExtractor = BatchExtractor()
+        batchExtractor.initialise(self.directory.get(), self.getParams())
+
+        print "Processing audio files..."
+        batchExtractor.process()
+        print "Complete"
+
+    def getParams(self):
+
         startTime = float(self.startTime.get())
         if(self.endTime.get() == '*'):
             endTime = None
         else:
             endTime = float(self.endTime.get())
-        window = self.window.get()
-        detector = self.detector.get()
-        m = int(self.mSize.get())
-        n = int(self.nSize.get())
-        h = int(self.hSize.get())
-        levelThreshold = float(self.levelThreshold.get())
-        filterSize = int(self.medianFilterSize.get())
-        offset = float(self.threshOffset.get())
-        factor = float(self.threshFactor.get())
-        tau = float(self.tau.get())
-        fLo = float(self.fLo.get())
-        fHi = float(self.fHi.get())
-        minIOI = float(self.minIOI.get())
-        allowPlot = self.plotState.get()
-
-        return (inputFile, startTime, endTime, window, m, n, h,
-                detector,levelThreshold, fLo, fHi, tau, filterSize, offset,
-                factor, minIOI, allowPlot)
-
-    def getParams(self):
-        params = self.getAllParams()[1:]
+        params = {  'startTime' : startTime,
+                    'endTime' : endTime,
+                    'detectorType' : self.detector.get(),
+                    'windowType' : self.window.get(),
+                    'windowSize' : int(self.windowSize.get()),
+                    'fftSize' : int(self.fftSize.get()),
+                    'hopSize' : int(self.hopSize.get()),
+                    'levelThreshold' : float(self.levelThreshold.get()), 
+                    'fLo' : float(self.fLo.get()),
+                    'fHi' : float(self.fHi.get()),
+                    'tau' : float(self.tau.get()),
+                    'filterSize' : int(self.medianFilterSize.get()),
+                    'offset' : float(self.threshOffset.get()),
+                    'factor' : float(self.threshFactor.get()),
+                    'minInterval' : float(self.minIOI.get())}
         return params
 
-    def setParams(self, startTime, endTime, window, M, N, H, detector,
-            levelThreshold, fLo, fHi, tau, filterSize, offset, factor,
-            interval, allowPlot):
+
+    def setParams(self, params):
 
         self.startTime.delete(0, END)
-        self.startTime.insert(0, startTime)
+        self.startTime.insert(0, params['startTime'])
         self.endTime.delete(0, END)
+        endTime = params['endTime']
         if endTime is None:
             endTime = '*'
-        self.endTime.insert(0, '*')
-        self.window.set(window)
-        self.detector.set(detector)
-        self.mSize.delete(0,END)
-        self.mSize.insert(0,M)
-        self.nSize.delete(0,END)
-        self.nSize.insert(0,N)
-        self.hSize.delete(0,END)
-        self.hSize.insert(0,H)
+        self.endTime.insert(0, endTime)
+        self.window.set(params['windowType'])
+        self.detector.set(params['detectorType'])
+        self.windowSize.delete(0,END)
+        self.windowSize.insert(0,params['windowSize'])
+        self.fftSize.delete(0,END)
+        self.fftSize.insert(0,params['fftSize'])
+        self.hopSize.delete(0,END)
+        self.hopSize.insert(0,params['hopSize'])
         self.levelThreshold.delete(0,END)
-        self.levelThreshold.insert(0,levelThreshold)
+        self.levelThreshold.insert(0,params['levelThreshold'])
         self.fLo.delete(0,END)
-        self.fLo.insert(0,fLo)
+        self.fLo.insert(0,params['fLo'])
         self.fHi.delete(0,END)
-        self.fHi.insert(0,fHi)
+        self.fHi.insert(0,params['fHi'])
         self.medianFilterSize.delete(0,END)
-        self.medianFilterSize.insert(0,filterSize)
+        self.medianFilterSize.insert(0,params['filterSize'])
         self.threshOffset.delete(0,END)
-        self.threshOffset.insert(0,offset)
+        self.threshOffset.insert(0,params['offset'])
         self.threshFactor.delete(0,END)
-        self.threshFactor.insert(0,factor)
+        self.threshFactor.insert(0,params['factor'])
         self.tau.delete(0,END)
-        self.tau.insert(0,tau)
+        self.tau.insert(0,params['tau'])
         self.minIOI.delete(0,END)
-        self.minIOI.insert(0,interval)
-        self.plotState.set(allowPlot == 'True')
+        self.minIOI.insert(0,params['minInterval'])
+        self.plotState.set(True)
 
 def main():
     root = Tk()

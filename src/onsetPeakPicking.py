@@ -1,5 +1,5 @@
 import numpy as np
-from UtilFuncs import *
+from sodpy.utilFuncs import *
 
 class PeakPicker():
 
@@ -19,17 +19,11 @@ class PeakPicker():
     def process(self, odf):
 
         # A.POST PROCESSING
-        #get the raw odf
+        #get the raw ODF
         self.odf = odf.copy()
 
-        #first normalise the detection function to range [0,1]
+        #first normalise the detection function to range [0, 1]
         normalise(self.odf)
-
-        #Remove low-level noise
-        '''
-        thresh = np.percentile(self.odf, 75)
-        self.odf[self.odf < thresh] = 0
-        '''
 
         #smooth the ODF using a zero-phase low-pass filter
         self.smoothODF = onePole(self.odf, self.fs/float(self.H), self.tau, True)

@@ -1,5 +1,5 @@
 import numpy as np
-from UtilFuncs import princarg
+from sodpy.utilFuncs import princarg
 eps = np.finfo(float).eps
 
 def getDetector(detectorType, N):

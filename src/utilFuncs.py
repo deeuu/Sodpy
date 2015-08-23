@@ -5,10 +5,9 @@ from scipy.signal import butter, filtfilt, lfilter
 eps = np.finfo(float).eps
 
 def noiseBurst(fs):
-    burst = np.ones(0.001*fs)
-    noise = np.random.randn(burst.size)
+    noise = np.random.randn(0.002 * fs)
     noise /= np.max(noise)
-    return burst * noise
+    return noise
 
 def normalise(env):
     env -= env.min()
