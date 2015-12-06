@@ -51,10 +51,10 @@ class Extractor:
         # Get analysis window
         w = get_window(self.params['windowType'], self.params['windowSize'])
 
-        # Initialise stft object
+        # STFT
         self.stft = STFT(self.signal, w, self.params['fftSize'], self.params['hopSize'])
 
-        # Get onset detector
+        # Onset detector
         self.detector = getDetector(self.params['detectorType'], self.params['fftSize'])
         self.detector.configureBPF(self.params['fftSize'], self.fs, 
                 self.params['fLo'], 
@@ -75,7 +75,7 @@ class Extractor:
             if self.allowPlot:
                 self.mXstore[frame] = mX+1e-5
 
-        # Initialise peak picker
+        # Peak picker and configuration
         self.picker = PeakPicker(self.fs, self.params['hopSize'])
         self.picker.medianFilterType = "Bello"
          
@@ -96,6 +96,7 @@ class Extractor:
             if outputFile is None:
                 outputFile = self.inputFile[:-4] + "_onsetTimes.csv"
             np.savetxt(outputFile, self.onsetTimes, delimiter=",")
+            print 'Saved to ', outputFile
         else:
             print "Warning: no onsets detected."
 

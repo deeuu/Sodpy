@@ -36,6 +36,7 @@ class PeakPicker():
         # C. PEAK-PICKING
         #find local maxima (peaks)
         peakIndices = self.detectPeaks()
+
         #clean up
         if peakIndices is not None:
             return self.computeOnsetTimes(peakIndices)
@@ -45,6 +46,10 @@ class PeakPicker():
     def detectPeaks(self):
         '''
         Detects peaks from the smooth onset detection function.
+        Criteria for peak detection:
+        smoothODF[i] > adaptThresh[i]
+        smoothODF[i] > smoothODF[i-1]
+        smoothODF[i] > smoothODF[i+1]
         '''
         peakIndices = np.array([], dtype='int')
         for i in range(1, self.smoothODF.size-1):
@@ -62,29 +67,32 @@ class PeakPicker():
             return peakIndices
 
     def computeOnsetTimes(self, peakIndices):
-        t = peakIndices * self.H / float(self.fs)
-        self.onsetTimes = np.array([t[0]])
+
+        tempOnsetTimes = peakIndices * self.H / float(self.fs)
+        self.onsetTimes = np.array([tempOnsetTimes[0]])
         self.onsetIndices = np.array([peakIndices[0]])
         self.onsetValues = np.array([self.smoothODF[peakIndices[0]]])
-        localTime = t[0]
-        for i in range(1, t.size):
+        localTime = tempOnsetTimes[0]
+
+        for i in range(1, tempOnsetTimes.size):
 
             #interval between this peak and the previous
-            interval = t[i]-localTime
+            interval = tempOnsetTimes[i] - localTime
+
             #value of current peak
             peakValue = self.smoothODF[peakIndices[i]]
 
             #allow if peak location exceeds min inter-onset interval
             if interval > self.minInterval:
                 self.onsetIndices = np.append(self.onsetIndices, peakIndices[i])
-                self.onsetTimes = np.append(self.onsetTimes, t[i])
+                self.onsetTimes = np.append(self.onsetTimes, tempOnsetTimes[i])
                 self.onsetValues = np.append(self.onsetValues, peakValue)
-                localTime = t[i]
+                localTime = tempOnsetTimes[i]
             #else if peak is larger, remove previous and use this one
             elif peakValue > self.onsetValues[-1]:
                 self.onsetIndices[-1] = peakIndices[i]
-                self.onsetTimes[-1] = t[i]
+                self.onsetTimes[-1] = tempOnsetTimes[i]
                 self.onsetValues[-1] = peakValue
-                localTime = t[i]
+                localTime = tempOnsetTimes[i]
 
         return self.onsetTimes
