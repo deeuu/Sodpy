@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import sys, os
 import pickle
 from scipy.signal import get_window
-from audiolab import wavread, wavwrite
+import soundfile as sf
 from sodpy.utilFuncs import noiseBurst, getEnvelope
 from sodpy.stft import STFT
 from sodpy.onsetPeakPicking import PeakPicker
@@ -37,7 +37,7 @@ class Extractor:
         self.inputFile = inputFile
 
         # Load sound file and segment
-        signal, self.fs, enc = wavread(inputFile)
+        signal, self.fs = sf.read(filename)
         startIdx = int(np.round(self.params['startTime'] * self.fs))
         if self.params['endTime'] is not None:
             endIdx = int(np.round(self.params['endTime'] * self.fs))
