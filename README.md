@@ -6,16 +6,16 @@ is useful for learning about onset detection algorithms, parameter tuning with
 supporting visualisation and batch processing audio files.
 
 You will need to install version 2.7.* of python and the following modules:
-ipython, numpy, scipy, matplotlib, and audiolab.
+ipython, numpy, scipy, matplotlib, and pysoundfile
 
 For scientific python in Ubuntu you can do:
 
 <code>$ sudo apt-get install python-dev ipython python-numpy python-matplotlib
 python-scipy </code>
 
-Audiolab is necessary for reading, writing and playing audio files:
+PySoundFile is necessary for reading and writing audio files:
 
-<code>$ git clone https://github.com/cournape/audiolab.git </code>
+<code>$ https://github.com/bastibe/PySoundFile.git </code>
 
 The basic GUI lives in the directory <code>interface/</code>; just type:
 
