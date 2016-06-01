@@ -19,7 +19,7 @@ Audiolab is necessary for reading, writing and playing audio files:
 
 The basic GUI lives in the directory <code>interface/</code>; just type:
 
-<code>$ python OnsetGUI </code>
+<code>$ python onsetGUI </code>
 
 Acknowledgments
 --------------
