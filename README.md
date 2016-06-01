@@ -15,7 +15,7 @@ python-scipy </code>
 
 PySoundFile is necessary for reading and writing audio files:
 
-<code>$ https://github.com/bastibe/PySoundFile.git </code>
+<code>$ git clone https://github.com/bastibe/PySoundFile.git </code>
 
 The basic GUI lives in the directory <code>interface/</code>; just type:
 
