@@ -32,12 +32,16 @@ class Extractor:
         self.allowPlot = True
         self.onsetTimes = None
 
-    def initialise(self, inputFile):
+    def initialise(self, inputFile, fs=None):
 
-        self.inputFile = inputFile
+        if type(inputFile) is str:
+            self.inputFile = inputFile
 
-        # Load sound file and segment
-        signal, self.fs = sf.read(filename)
+            # Load sound file and segment
+            signal, self.fs = sf.read(inputFile)
+        else:
+            signal = inputFile
+            self.fs = fs
         startIdx = int(np.round(self.params['startTime'] * self.fs))
         if self.params['endTime'] is not None:
             endIdx = int(np.round(self.params['endTime'] * self.fs))

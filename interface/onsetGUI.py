@@ -1,7 +1,7 @@
 from Tkinter import *
 import tkFileDialog, tkMessageBox
 import sys, os
-from audiolab import wavread, play
+import soundfile as sf
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../src/'))
 from onsetExtraction import Extractor, BatchExtractor
 import pickle
@@ -34,10 +34,6 @@ class OnsetsGUI:
         #BUTTON TO BROWSE SOUND FILE
         self.openFile = Button(self.parent, text="Browse...", command=self.browse_file) #see: def browse_file(self)
         self.openFile.grid(row=rowIdx, column=0, sticky=W, padx=(220, 6)) #put it beside the fileLocation textbox
-
-        #BUTTON TO PREVIEW SOUND FILE
-        self.preview = Button(self.parent, text=">", command=self.previewSound, bg="gray30", fg="white")
-        self.preview.grid(row=rowIdx, column=0, sticky=W, padx=(306,6))
         rowIdx += 1
 
         #DETECTOR TYPE
@@ -53,7 +49,7 @@ class OnsetsGUI:
         windowOption.grid(row=rowIdx, column=0, sticky=W, padx=80)
         rowIdx += 1
 
-	#ANALYSIS WINDOW TYPE
+	    #ANALYSIS WINDOW TYPE
         windowTypeLabel = "Window:"
         Label(self.parent, text=windowTypeLabel).grid(row=rowIdx, column=0, sticky=W,
                 padx=5)
@@ -211,10 +207,6 @@ class OnsetsGUI:
         self.compute = Button(self.parent, text="Process", command=self.process, bg="dark red", fg="white")
         self.compute.grid(row=rowIdx, column=0, padx=5, pady=10, sticky=W)
 
-        #BUTTON TO PREVIEW OUTPUT SOUND FILE
-        self.preview = Button(self.parent, text=">", command=self.previewOutput, bg="gray30", fg="white")
-        self.preview.grid(row=rowIdx, column=0, sticky=W, padx=80)
-
         #PLOT OPTION
         self.plotState = BooleanVar()
         self.plotState.set(True)
@@ -276,23 +268,6 @@ class OnsetsGUI:
         self.directoryName = tkFileDialog.askdirectory()
         self.directory.delete(0,END)
         self.directory.insert(0, self.directoryName)
-
-    def previewSound(self):
-        signal, fs, enc = wavread(self.filename)
-        startIdx = int(float(self.startTime.get())* fs)
-        if(self.endTime.get() == '*'):
-            endIdx = None
-        else:
-            endIdx = int(float(self.endTime.get())*fs)
-        play(signal[startIdx:endIdx], fs)
-
-    def previewOutput(self):
-        out = self.extractor.generateMarkedAudio()
-        print out
-        if out:
-            play(out[0], out[1])
-        else:
-            print 'Please try processing the input audio again.'
 
     def loadParams(self):
         fileName = tkFileDialog.askopenfilename(**self.fileParamsOpt)
